@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Лабораторія</title>
+    <style>
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            /* Відключаємо прокручування сторінки */
+            background-color: #222;
+            /* Темний колір фону */
+            color: #fff;
+            /* Білий колір тексту */
+            font-family: Arial, sans-serif;
+            /* Шрифт тексту */
+        }
+
+        .container {
+            display: flex;
+            height: 100%;
+            overflow: hidden;
+            /* Відключаємо прокручування контейнера */
+        }
+
+        .block {
+            flex: 1;
+            height: 100%;
+            overflow: hidden;
+            /* Відключаємо прокручування блоків */
+        }
+
+        .block1 {
+            flex: 0 0 30%;
+            background-color: #444;
+            /* Темний колір фону першого блоку */
+            height: 100%;
+            overflow-y: auto;
+            /* Включаємо прокручування тільки для першого блоку, якщо контент перевищує розмір */
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .form {
+            margin-bottom: 20px;
+        }
+
+        .statistics {
+            font-size: 18px;
+        }
+
+        canvas {
+            display: block;
+            background-color: #333;
+            /* Колір фону canvas */
+            width: 100%;
+            /* Розтягуємо canvas на всю ширину блоку */
+            height: 100%;
+            /* Розтягуємо canvas на всю висоту блоку */
+        }
+
+        #controls {
+            margin-top: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-right: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button:active {
+            background-color: #3e9141;
+        }
+
+        #result1 {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+
+        /* Стилі для міток (labels) */
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        /* Стилі для полів вводу (input) */
+        input[type="text"] {
+            width: 50%;
+            padding: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #3e9141;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+
+        button:disabled,
+        button[disabled] {
+
+            background-color: #333;
+
+        }
+
+        #controls {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            
+        }
+
+        #pauseButton {
+            background-color: #afa04c;
+
+        }
+
+        #startButton,
+        #pauseButton {
+            width: 50%;
+            
+            
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="block block1">
+            <div class="title" style="padding: 5px;padding-top: 10px;">
+                <center>Cell Lab</center>
+            </div>
+            <div class="description"><small>
+                    <center>Лабораторія частинок. Симуляція взаємодії.</center>
+                </small></div>
+            <!-- HTML -->
+            <div class="form" style="padding: 15px;">
+                <!-- Форми для редагування параметрів -->
+                <label for="param1">Кількість жовтих:</label>
+                <input type="text" id="param1" value="100"><br>
+                <label for="param3">Швидкість жовтих:</label>
+                <input type="text" id="param3" value="2">
+                <hr>
+                <label for="param2">Кількість червоних:</label>
+                <input type="text" id="param2" value="25"><br>
+                <label for="param4">Швидкість червоних:</label>
+                <input type="text" id="param4" value="18"><br>
+                <!-- Додайте більше форм, які вам потрібні -->
+                <button id="updateButton">Оновити</button>
+            </div>
+
+            <!-- <div class="statistics" style="padding: 15px;">
+             
+                <div>Статистика:</div>
+                <div id="result1">Результат 1: <span id="particleCount">0</span></div>
+
+                <div id="result2">Результат 2: </div>
+               
+            </div> -->
+            <div id="controls" style="padding: 5px;padding-top: 10px;">
+                <button class="" id="startButton">Старт</button>
+                <button class="" id="pauseButton">Пауза</button>
+            </div>
+        </div>
+        <div class="block block2">
+            <canvas id="canvas" width="100%" height="100%"></canvas>
+        </div>
+    </div>
+</body>
+
+</html>
+
+<script>
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+
+
+
+        const particlesYellow = [];
+        const particlesRed = [];
+
+
+
+
+        // Генерація частинок жовтого кольору
+        for (let i = 0; i < 100; i++) {
+            const particleYellow = {
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                color: "yellow",
+                size: 3,
+                speed: 2,
+            };
+            particlesYellow.push(particleYellow);
+        }
+
+        // Генерація частинок червоного кольору
+        for (let i = 0; i < 25; i++) {
+            const particleRed = {
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                color: "red",
+                size: 6,
+                speed: 18,
+            };
+            particlesRed.push(particleRed);
+        }
+
+        // Функція для малювання частинок на canvas
+        function drawParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "yellow";
+            particlesYellow.forEach(particleYellow => {
+                ctx.beginPath();
+                ctx.arc(particleYellow.x, particleYellow.y, particleYellow.size, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+
+            ctx.fillStyle = "red";
+            particlesRed.forEach(particleRed => {
+                ctx.beginPath();
+                ctx.arc(particleRed.x, particleRed.y, particleRed.size, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+        }
+
+        // Функція для обчислення відстані між двома точками на площині
+        function distance(p1, p2) {
+            return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
+        }
+
+        // Функція для анімації частинок
+        function animateParticles() {
+
+            particlesYellow.forEach(particleYellow => {
+                const dx = (Math.random() - 0.5) * particleYellow.speed;
+                const dy = (Math.random() - 0.5) * particleYellow.speed;
+
+                // Обробка стикання з межами canvas
+                if (particleYellow.x + dx < particleYellow.size || particleYellow.x + dx > canvas.width - particleYellow.size) {
+                    particleYellow.x -= dx;
+                } else {
+                    particleYellow.x += dx;
+                }
+
+                if (particleYellow.y + dy < particleYellow.size || particleYellow.y + dy > canvas.height - particleYellow.size) {
+                    particleYellow.y -= dy;
+                } else {
+                    particleYellow.y += dy;
+                }
+
+                // Притягування жовтих частинок до червоних, якщо вони дуже близько
+                particlesRed.forEach(particleRed => {
+                    const dist = distance(particleYellow, particleRed);
+                    const forceFactor = 10;
+                    const forceX = (particleRed.x - particleYellow.x) / dist * forceFactor;
+                    const forceY = (particleRed.y - particleYellow.y) / dist * forceFactor;
+
+                    if (dist < 50) {
+                        particleYellow.x += forceX;
+                        particleYellow.y += forceY;
+                    }
+                });
+            });
+
+            particlesRed.forEach(particleRed => {
+                // Додаємо рух для червоних частинок
+                const dx = (Math.random() - 0.5) * particleRed.speed;
+                const dy = (Math.random() - 0.5) * particleRed.speed;
+
+                // Обробка стикання з межами canvas
+                if (particleRed.x + dx < particleRed.size || particleRed.x + dx > canvas.width - particleRed.size) {
+                    particleRed.x -= dx;
+                } else {
+                    particleRed.x += dx;
+                }
+
+                if (particleRed.y + dy < particleRed.size || particleRed.y + dy > canvas.height - particleRed.size) {
+                    particleRed.y -= dy;
+                } else {
+                    particleRed.y += dy;
+                }
+            });
+
+            // Перевірка, чи анімацію треба продовжувати
+            if (isAnimating) {
+                drawParticles();
+                // updateParticleCount(); // Оновлення значення particleCount
+                requestAnimationFrame(animateParticles);
+            }
+        }
+
+        // Функція для оновлення кількості частинок та перегенерації масивів
+        function updateParticles() {
+            const yellowCountInput = document.getElementById("param1");
+            const redCountInput = document.getElementById("param2");
+            const yellowSpeedInput = document.getElementById("param3");
+            const redSpeedInput = document.getElementById("param4");
+
+            const yellowCount = parseInt(yellowCountInput.value);
+            const redCount = parseInt(redCountInput.value);
+            const yellowSpeed = parseInt(yellowSpeedInput.value);
+            const redSpeed = parseInt(redSpeedInput.value);
+
+            if (!isNaN(yellowCount) && !isNaN(redCount)) {
+                particlesYellow.length = 0
+                particlesRed.length = 0
+                // Перегенерація масивів частинок з новими значеннями
+                for (let i = particlesYellow.length; i < yellowCount; i++) {
+                    const particleYellow = {
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        color: "yellow",
+                        size: 3,
+                        speed: yellowSpeed,
+                    };
+                    particlesYellow.push(particleYellow);
+                }
+
+                for (let i = particlesRed.length; i < redCount / 4; i++) {
+                    const particleRed = {
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        color: "red",
+                        size: 6,
+                        speed: redSpeed,
+                    };
+                    particlesRed.push(particleRed);
+                }
+            }
+        }
+
+
+
+        let isAnimating = false; // Змінна для відстеження стану анімації
+
+        // Функція для запуску анімації
+        function startAnimation() {
+            isAnimating = true;
+            animateParticles();
+            updateButtonStates();
+        }
+
+        // Функція для призупинення анімації
+        function pauseAnimation() {
+            isAnimating = false;
+            updateButtonStates();
+        }
+
+        // Обробник події для кнопки "Старт"
+        const startButton = document.getElementById("startButton");
+        startButton.addEventListener("click", startAnimation);
+
+        // Обробник події для кнопки "Пауза"
+        const pauseButton = document.getElementById("pauseButton");
+        pauseButton.addEventListener("click", pauseAnimation);
+
+        function updateButtonStates() {
+            startButton.disabled = isAnimating;
+            pauseButton.disabled = !isAnimating;
+        }
+        // Оновлення значення particleCount при кожному кроці анімації
+        // function updateParticleCount() {
+        //     const particleCountElement = document.getElementById("particleCount");
+        //     particleCountElement.textContent = particlesYellow.length;
+        // }
+
+        animateParticles();
+
+        // Обробник події для кнопки "Оновити"
+        const updateButton = document.getElementById("updateButton");
+        updateButton.addEventListener("click", function () {
+            updateParticles();
+        });
+    });
+</script>
